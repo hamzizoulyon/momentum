@@ -1,6 +1,7 @@
 import React from "react";
 import Logo from "../assets/images/export_svg_logo";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 const Navbar = () => {
   return (
@@ -17,8 +18,12 @@ const Navbar = () => {
         </div>
 
         <div className="flex gap-3">
-          <Button>Sign In</Button>
-          <Button variant="secondary">Sign Up</Button>
+          <Link href="/login">
+            <Button>Sign In</Button>
+          </Link>
+          <Link href="/register">
+            <Button variant="secondary">Sign Up</Button>
+          </Link>
         </div>
       </div>
     </header>
