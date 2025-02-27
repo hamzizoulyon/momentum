@@ -63,9 +63,7 @@ export default function StatisticsPage() {
       date: format(day, "EEE", { locale: fr }),
       completed: habits.filter((habit) =>
         habit.tracking.some(
-          (t) =>
-            new Date(t.date).toDateString() === day.toDateString() &&
-            t.completed
+          (t) => new Date(t.date).toDateString() === day.toDateString() && t.completed
         )
       ).length,
       total: habits.length,
@@ -79,9 +77,7 @@ export default function StatisticsPage() {
         acc[category] = { total: 0, completed: 0 };
       }
       acc[category].total += 1;
-      acc[category].completed += habit.tracking.filter(
-        (t) => t.completed
-      ).length;
+      acc[category].completed += habit.tracking.filter((t) => t.completed).length;
       return acc;
     }, {});
 
@@ -180,10 +176,7 @@ export default function StatisticsPage() {
                       label
                     >
                       {prepareCategoryData().map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={COLORS[index % COLORS.length]}
-                        />
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
                     <Tooltip />
@@ -206,9 +199,7 @@ export default function StatisticsPage() {
                   <p className="text-2xl font-bold text-blue-800 dark:text-blue-300">
                     {Math.round(
                       (habits.reduce(
-                        (acc, habit) =>
-                          acc +
-                          habit.tracking.filter((t) => t.completed).length,
+                        (acc, habit) => acc + habit.tracking.filter((t) => t.completed).length,
                         0
                       ) /
                         (habits.length * 7)) *
@@ -229,9 +220,7 @@ export default function StatisticsPage() {
                   <h3 className="text-sm font-medium text-purple-600 dark:text-purple-400">
                     Meilleure série
                   </h3>
-                  <p className="text-2xl font-bold text-purple-800 dark:text-purple-300">
-                    7 jours
-                  </p>
+                  <p className="text-2xl font-bold text-purple-800 dark:text-purple-300">7 jours</p>
                 </div>
               </div>
             </div>

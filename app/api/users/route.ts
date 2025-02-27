@@ -9,10 +9,7 @@ export async function GET() {
     const users = await prisma.user.findMany();
     return NextResponse.json(users, { status: 200 });
   } catch (error) {
-    return NextResponse.json(
-      { error: "Failed to fetch users" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch users" }, { status: 500 });
   }
 }
 
@@ -26,9 +23,6 @@ export async function POST(req: Request) {
 
     return NextResponse.json(newUser, { status: 201 });
   } catch (error) {
-    return NextResponse.json(
-      { error: "Failed to create user" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to create user" }, { status: 500 });
   }
 }

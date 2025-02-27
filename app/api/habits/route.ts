@@ -20,10 +20,7 @@ export async function POST(req: Request) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: "Utilisateur non trouvé" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Utilisateur non trouvé" }, { status: 404 });
     }
 
     const habit = await prisma.habit.create({
@@ -60,10 +57,7 @@ export async function GET() {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: "Utilisateur non trouvé" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Utilisateur non trouvé" }, { status: 404 });
     }
 
     const habits = await prisma.habit.findMany({

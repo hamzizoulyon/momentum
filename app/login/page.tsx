@@ -39,20 +39,13 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-100 to-white dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 w-full max-w-md space-y-6">
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
-            Bienvenue
-          </h2>
-          <p className="text-gray-500 dark:text-gray-400">
-            Connectez-vous à votre compte
-          </p>
+          <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">Bienvenue</h2>
+          <p className="text-gray-500 dark:text-gray-400">Connectez-vous à votre compte</p>
         </div>
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <label
-              htmlFor="email"
-              className="text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
+            <label htmlFor="email" className="text-sm font-medium text-gray-700 dark:text-gray-300">
               Email
             </label>
             <Input

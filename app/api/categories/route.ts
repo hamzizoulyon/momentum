@@ -15,10 +15,7 @@ export async function GET(req: Request) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: "Utilisateur non trouvé" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Utilisateur non trouvé" }, { status: 404 });
     }
 
     const categories = await prisma.category.findMany({
@@ -50,10 +47,7 @@ export async function POST(req: Request) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: "Utilisateur non trouvé" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Utilisateur non trouvé" }, { status: 404 });
     }
 
     const category = await prisma.category.create({

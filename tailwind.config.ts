@@ -11,7 +11,7 @@ const config = {
     extend: {
       colors: {
         primary: "#89AC46",
-        },
+      },
     },
   },
   plugins: [],

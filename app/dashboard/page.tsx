@@ -146,18 +146,11 @@ export default function Dashboard() {
               </h2>
             </div>
             <div className="flex flex-col items-center justify-center">
-              <ProgressRing
-                progress={calculateProgress(habits)}
-                className="mb-4"
-              />
+              <ProgressRing progress={calculateProgress(habits)} className="mb-4" />
               <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                 <CheckCircleIcon className="h-5 w-5 text-green-500 mr-2" />
                 <p>
-                  {
-                    habits.filter((habit) =>
-                      habit.tracking?.some((t: any) => t.completed)
-                    ).length
-                  }{" "}
+                  {habits.filter((habit) => habit.tracking?.some((t: any) => t.completed)).length}{" "}
                   sur {habits.length} habitudes complétées
                 </p>
               </div>
@@ -168,39 +161,27 @@ export default function Dashboard() {
           <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
             <div className="flex items-center mb-4">
               <ChartBarIcon className="h-6 w-6 text-blue-500 mr-2" />
-              <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
-                Statistiques
-              </h2>
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Statistiques</h2>
             </div>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <FireIcon className="h-5 w-5 text-orange-500 mr-2" />
-                  <span className="text-gray-600 dark:text-gray-400">
-                    Série actuelle
-                  </span>
+                  <span className="text-gray-600 dark:text-gray-400">Série actuelle</span>
                 </div>
-                <span className="font-semibold text-gray-800 dark:text-white">
-                  3 jours
-                </span>
+                <span className="font-semibold text-gray-800 dark:text-white">3 jours</span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <CalendarIcon className="h-5 w-5 text-purple-500 mr-2" />
-                  <span className="text-gray-600 dark:text-gray-400">
-                    Ce mois
-                  </span>
+                  <span className="text-gray-600 dark:text-gray-400">Ce mois</span>
                 </div>
-                <span className="font-semibold text-gray-800 dark:text-white">
-                  75%
-                </span>
+                <span className="font-semibold text-gray-800 dark:text-white">75%</span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <ArrowTrendingUpIcon className="h-5 w-5 text-green-500 mr-2" />
-                  <span className="text-gray-600 dark:text-gray-400">
-                    Tendance
-                  </span>
+                  <span className="text-gray-600 dark:text-gray-400">Tendance</span>
                 </div>
                 <span className="text-green-500">+12%</span>
               </div>
@@ -211,9 +192,7 @@ export default function Dashboard() {
           <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
             <div className="flex items-center mb-4">
               <StarIcon className="h-6 w-6 text-amber-500 mr-2" />
-              <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
-                Objectifs
-              </h2>
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Objectifs</h2>
             </div>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -225,9 +204,7 @@ export default function Dashboard() {
                     <p className="text-sm font-medium text-gray-700 dark:text-gray-200">
                       Niveau actuel
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      Débutant motivé
-                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Débutant motivé</p>
                   </div>
                 </div>
                 <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200">
@@ -307,9 +284,7 @@ export default function Dashboard() {
                     <Input
                       type="checkbox"
                       checked={habit.tracking?.[0]?.completed || false}
-                      onChange={(e) =>
-                        handleTrackingUpdate(habit, e.target.checked)
-                      }
+                      onChange={(e) => handleTrackingUpdate(habit, e.target.checked)}
                       className="w-5 h-5 rounded text-blue-600"
                     />
                     <div>
@@ -365,9 +340,9 @@ export default function Dashboard() {
               <div className="p-6">
                 <h2 className="text-xl font-semibold mb-4">Conseil du jour</h2>
                 <p className="text-blue-100">
-                  Commencez petit : visez la constance plutôt que la perfection.
-                  Une habitude de 5 minutes pratiquée régulièrement est plus
-                  efficace qu'une habitude d'une heure pratiquée sporadiquement.
+                  Commencez petit : visez la constance plutôt que la perfection. Une habitude de 5
+                  minutes pratiquée régulièrement est plus efficace qu'une habitude d'une heure
+                  pratiquée sporadiquement.
                 </p>
               </div>
             </div>

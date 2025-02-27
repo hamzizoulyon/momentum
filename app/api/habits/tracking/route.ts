@@ -21,10 +21,7 @@ export async function POST(req: Request) {
     });
 
     if (!habit) {
-      return NextResponse.json(
-        { error: "Habitude non trouvée" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Habitude non trouvée" }, { status: 404 });
     }
 
     // Créer ou mettre à jour le suivi
@@ -49,10 +46,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(tracking);
   } catch (error) {
-    return NextResponse.json(
-      { error: "Erreur lors du suivi de l'habitude" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Erreur lors du suivi de l'habitude" }, { status: 500 });
   }
 }
 

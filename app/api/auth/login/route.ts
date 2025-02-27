@@ -9,19 +9,13 @@ export async function POST(req: Request) {
     const { email, password } = await req.json();
 
     if (!email || !password) {
-      return NextResponse.json(
-        { error: "Missing email or password" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Missing email or password" }, { status: 400 });
     }
 
     // Vérifier si l'utilisateur existe
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
-      return NextResponse.json(
-        { error: "Invalid credentials user not found" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Invalid credentials user not found" }, { status: 401 });
     }
 
     // Vérifier le mot de passe
@@ -34,13 +28,9 @@ export async function POST(req: Request) {
     }
 
     // Génération du token JWT
-    const token = jwt.sign(
-      { userId: user.id, email: user.email },
-      process.env.JWT_SECRET!,
-      {
-        expiresIn: "7d",
-      }
-    );
+    const token = jwt.sign({ userId: user.id, email: user.email }, process.env.JWT_SECRET!, {
+      expiresIn: "7d",
+    });
 
     // Stocker le token dans un cookie sécurisé
     const cookieStore = await cookies();
@@ -54,9 +44,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ message: "Login successful" }, { status: 200 });
   } catch (error) {
     console.error("Login error:", error);
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

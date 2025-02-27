@@ -63,7 +63,7 @@ export default function SettingsPage() {
     setIsLoading(true);
     try {
       // Simulation d'une requête API
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       setMessage({ type: "success", content: "Préférences mises à jour avec succès" });
     } catch (error: any) {
       setMessage({ type: "error", content: "Erreur lors de la mise à jour des préférences" });
@@ -77,16 +77,12 @@ export default function SettingsPage() {
       <Sidebar />
       <div className="ml-64 flex-1 p-8">
         <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
-            Paramètres
-          </h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">Paramètres</h1>
 
           {message.content && (
             <div
               className={`mb-6 p-4 rounded-lg ${
-                message.type === "error"
-                  ? "bg-red-100 text-red-700"
-                  : "bg-green-100 text-green-700"
+                message.type === "error" ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"
               }`}
             >
               {message.content}
@@ -97,12 +93,7 @@ export default function SettingsPage() {
           <div className="bg-white dark:bg-gray-800 shadow rounded-lg mb-6 transition-all duration-200 hover:shadow-lg">
             <div className="p-6">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
-                <svg
-                  className="w-6 h-6 mr-2"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
+                <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -202,12 +193,7 @@ export default function SettingsPage() {
           <div className="bg-white dark:bg-gray-800 shadow rounded-lg transition-all duration-200 hover:shadow-lg">
             <div className="p-6">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
-                <svg
-                  className="w-6 h-6 mr-2"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
+                <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"

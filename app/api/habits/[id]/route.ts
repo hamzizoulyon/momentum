@@ -3,10 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
 import prisma from "@/lib/prisma";
 
-export async function PUT(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(req: Request, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -28,17 +25,11 @@ export async function PUT(
     return NextResponse.json(habit);
   } catch (error) {
     console.error("Erreur modification habitude:", error);
-    return NextResponse.json(
-      { error: "Erreur lors de la modification" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Erreur lors de la modification" }, { status: 500 });
   }
 }
 
-export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: Request, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -54,9 +45,6 @@ export async function DELETE(
     return NextResponse.json({ message: "Habitude supprimée" });
   } catch (error) {
     console.error("Erreur suppression habitude:", error);
-    return NextResponse.json(
-      { error: "Erreur lors de la suppression" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Erreur lors de la suppression" }, { status: 500 });
   }
 }

@@ -21,10 +21,7 @@ export const authOptions = {
         });
         if (!user) throw new Error("Invalid credentials user not found");
 
-        const passwordMatch = await bcrypt.compare(
-          credentials.password,
-          user.password
-        );
+        const passwordMatch = await bcrypt.compare(credentials.password, user.password);
         if (!passwordMatch) throw new Error("Invalid credentials password not match");
 
         return {

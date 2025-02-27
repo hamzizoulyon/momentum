@@ -64,8 +64,7 @@ export default function MesHabitudesPage() {
 
   // Filtrer les habitudes en fonction de la catégorie et du terme de recherche
   const filteredHabits = habits.filter((habit) => {
-    const matchesCategory =
-      selectedCategory === "all" || habit.categoryId === selectedCategory;
+    const matchesCategory = selectedCategory === "all" || habit.categoryId === selectedCategory;
     const matchesSearch =
       habit.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       habit.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -92,9 +91,7 @@ export default function MesHabitudesPage() {
       <Sidebar />
       <div className="ml-64 flex-1 p-8">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
-            Mes Habitudes
-          </h1>
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Mes Habitudes</h1>
           <button className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700">
             <PlusIcon className="h-5 w-5" />
             Nouvelle habitude
@@ -129,10 +126,7 @@ export default function MesHabitudesPage() {
                     : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200"
                 }`}
                 style={{
-                  backgroundColor:
-                    selectedCategory === category.id
-                      ? category.color
-                      : undefined,
+                  backgroundColor: selectedCategory === category.id ? category.color : undefined,
                 }}
               >
                 <span
@@ -169,9 +163,7 @@ export default function MesHabitudesPage() {
                       {habit.name}
                     </h2>
                   </div>
-                  <p className="text-gray-600 dark:text-gray-400 mt-1">
-                    {habit.description}
-                  </p>
+                  <p className="text-gray-600 dark:text-gray-400 mt-1">{habit.description}</p>
                   <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
                     Fréquence: {habit.frequency.toLowerCase()}
                     {habit.category && ` • ${habit.category.name}`}

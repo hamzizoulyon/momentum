@@ -3,10 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../../auth/[...nextauth]/route";
 import prisma from "@/lib/prisma";
 
-export async function PUT(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(req: Request, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -24,9 +21,6 @@ export async function PUT(
     return NextResponse.json(tracking);
   } catch (error) {
     console.error("Erreur mise à jour tracking:", error);
-    return NextResponse.json(
-      { error: "Erreur lors de la mise à jour" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Erreur lors de la mise à jour" }, { status: 500 });
   }
-} 
+}

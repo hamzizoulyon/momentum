@@ -6,7 +6,6 @@ import { Poppins } from "next/font/google";
 import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "@/context/ThemeContext";
 
-
 const poppins = Poppins({
   subsets: ["latin"],
   variable: "--font-poppins",

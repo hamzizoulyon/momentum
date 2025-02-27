@@ -16,12 +16,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Récupérer la préférence stockée ou la préférence système
     const storedTheme = localStorage.getItem("theme");
-    const systemPrefersDark = window.matchMedia(
-      "(prefers-color-scheme: dark)"
-    ).matches;
+    const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
 
-    const shouldUseDarkMode =
-      storedTheme === "dark" || (!storedTheme && systemPrefersDark);
+    const shouldUseDarkMode = storedTheme === "dark" || (!storedTheme && systemPrefersDark);
 
     setIsDarkMode(shouldUseDarkMode);
     if (shouldUseDarkMode) {
@@ -51,9 +48,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <ThemeContext.Provider value={{ isDarkMode, toggleDarkMode }}>
-      {children}
-    </ThemeContext.Provider>
+    <ThemeContext.Provider value={{ isDarkMode, toggleDarkMode }}>{children}</ThemeContext.Provider>
   );
 }
 

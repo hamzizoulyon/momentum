@@ -10,12 +10,7 @@ interface EditHabitModalProps {
   onEdit: () => void;
 }
 
-export default function EditHabitModal({
-  habit,
-  isOpen,
-  onClose,
-  onEdit,
-}: EditHabitModalProps) {
+export default function EditHabitModal({ habit, isOpen, onClose, onEdit }: EditHabitModalProps) {
   const [name, setName] = useState(habit.name);
   const [description, setDescription] = useState(habit.description || "");
   const [frequency, setFrequency] = useState(habit.frequency);
@@ -59,9 +54,7 @@ export default function EditHabitModal({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
-            Modifier l'habitude
-          </h2>
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Modifier l'habitude</h2>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
@@ -70,11 +63,7 @@ export default function EditHabitModal({
           </button>
         </div>
 
-        {error && (
-          <div className="mb-4 p-3 bg-red-100 text-red-600 rounded-lg">
-            {error}
-          </div>
-        )}
+        {error && <div className="mb-4 p-3 bg-red-100 text-red-600 rounded-lg">{error}</div>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

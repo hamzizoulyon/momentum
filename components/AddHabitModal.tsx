@@ -8,11 +8,7 @@ interface AddHabitModalProps {
   onAdd: () => void;
 }
 
-export default function AddHabitModal({
-  isOpen,
-  onClose,
-  onAdd,
-}: AddHabitModalProps) {
+export default function AddHabitModal({ isOpen, onClose, onAdd }: AddHabitModalProps) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [frequency, setFrequency] = useState("DAILY");
@@ -50,9 +46,7 @@ export default function AddHabitModal({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">
-          Nouvelle habitude
-        </h2>
+        <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Nouvelle habitude</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

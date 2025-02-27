@@ -1,11 +1,6 @@
 import React from "react";
 
-function Logo({
-  height = "100px",
-  width = "100px",
-  borderColor = "#443627",
-  color = "#89AC46",
-}) {
+function Logo({ height = "100px", width = "100px", borderColor = "#443627", color = "#89AC46" }) {
   return (
     <svg
       version="1.1"

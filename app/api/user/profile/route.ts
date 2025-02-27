@@ -18,23 +18,14 @@ export async function PUT(req: Request) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: "Utilisateur non trouvé" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Utilisateur non trouvé" }, { status: 404 });
     }
 
     // Vérifier le mot de passe actuel si un nouveau mot de passe est fourni
     if (newPassword) {
-      const passwordMatch = await bcrypt.compare(
-        currentPassword,
-        user.password
-      );
+      const passwordMatch = await bcrypt.compare(currentPassword, user.password);
       if (!passwordMatch) {
-        return NextResponse.json(
-          { error: "Mot de passe actuel incorrect" },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: "Mot de passe actuel incorrect" }, { status: 400 });
       }
     }
 
@@ -61,9 +52,6 @@ export async function PUT(req: Request) {
     });
   } catch (error) {
     console.error("Erreur mise à jour profil:", error);
-    return NextResponse.json(
-      { error: "Erreur lors de la mise à jour du profil" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Erreur lors de la mise à jour du profil" }, { status: 500 });
   }
 }
