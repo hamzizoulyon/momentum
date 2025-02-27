@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
       return NextResponse.json(
-        { error: "Invalid credentials" },
+        { error: "Invalid credentials user not found" },
         { status: 401 }
       );
     }
@@ -28,7 +28,7 @@ export async function POST(req: Request) {
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
       return NextResponse.json(
-        { error: "Invalid credentials" },
+        { error: "Invalid credentials password not match" },
         { status: 401 }
       );
     }

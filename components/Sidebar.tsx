@@ -3,6 +3,7 @@ import { useSession, signOut } from "next-auth/react";
 import { useTheme } from "@/context/ThemeContext";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { CheckCircleIcon } from "@heroicons/react/24/outline";
 
 export default function Sidebar() {
   const { data: session } = useSession();
@@ -80,6 +81,18 @@ export default function Sidebar() {
               />
             </svg>
             <span>Tableau de bord</span>
+          </Link>
+
+          <Link
+            href="/mes-habitudes"
+            className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition duration-200 ${
+              isActivePath("/mes-habitudes")
+                ? "bg-blue-50 dark:bg-gray-700 text-blue-600 dark:text-blue-400"
+                : "text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700"
+            }`}
+          >
+            <CheckCircleIcon className="w-5 h-5" />
+            <span>Mes Habitudes</span>
           </Link>
 
           <Link
