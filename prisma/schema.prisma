@@ -41,6 +41,7 @@ model HabitTracking {
   completed Boolean  @default(false)
   date      DateTime @default(now())
   notes     String?
-
+  
   @@unique([habitId, date])
+  @@index([date])
 }
