@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import { Input } from "./ui/input";
 
 interface EditHabitModalProps {
   habit: any;
@@ -80,7 +81,7 @@ export default function EditHabitModal({
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Nom
             </label>
-            <input
+            <Input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}

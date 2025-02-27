@@ -16,9 +16,14 @@ import {
   ArrowTrendingUpIcon,
   PencilIcon,
   TrashIcon,
+  XMarkIcon,
+  StarIcon,
+  CheckBadgeIcon,
+  GiftIcon,
 } from "@heroicons/react/24/outline";
 import Sidebar from "@/components/Sidebar";
 import EditHabitModal from "@/components/EditHabitModal";
+import { Input } from "@/components/ui/input";
 
 export default function Dashboard() {
   const { data: session, status } = useSession();
@@ -29,6 +34,7 @@ export default function Dashboard() {
   const [mounted, setMounted] = useState(false);
   const [editingHabit, setEditingHabit] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [showTip, setShowTip] = useState(true);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -201,8 +207,81 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Section Habitudes */}
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm lg:col-span-2">
+          {/* Nouvelle Section Objectifs */}
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+            <div className="flex items-center mb-4">
+              <StarIcon className="h-6 w-6 text-amber-500 mr-2" />
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
+                Objectifs
+              </h2>
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
+                    <CheckBadgeIcon className="h-5 w-5 text-green-500" />
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                      Niveau actuel
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      Débutant motivé
+                    </p>
+                  </div>
+                </div>
+                <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                  Niveau 2
+                </span>
+              </div>
+
+              <div className="relative pt-1">
+                <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">
+                  Progression niveau suivant
+                </div>
+                <div className="flex h-2 overflow-hidden rounded bg-gray-200 dark:bg-gray-700">
+                  <div
+                    className="flex flex-col justify-center overflow-hidden bg-blue-500"
+                    role="progressbar"
+                    style={{ width: "65%" }}
+                    aria-valuenow={65}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                  ></div>
+                </div>
+                <div className="text-right text-xs text-gray-600 dark:text-gray-400 mt-1">
+                  65/100 points
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Prochaines récompenses
+                </h3>
+                <div className="space-y-2">
+                  <div className="flex items-center text-sm">
+                    <GiftIcon className="h-4 w-4 text-purple-500 mr-2" />
+                    <span className="text-gray-600 dark:text-gray-400">
+                      Nouveau thème à 75 points
+                    </span>
+                  </div>
+                  <div className="flex items-center text-sm">
+                    <TrophyIcon className="h-4 w-4 text-yellow-500 mr-2" />
+                    <span className="text-gray-600 dark:text-gray-400">
+                      Badge "Expert" à 100 points
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Section des habitudes */}
+          <div
+            className={`bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm ${
+              showTip ? "lg:col-span-2" : "lg:col-span-3"
+            }`}
+          >
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center">
                 <CheckCircleIcon className="h-6 w-6 text-green-500 mr-2" />
@@ -225,7 +304,7 @@ export default function Dashboard() {
                   className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg"
                 >
                   <div className="flex items-center gap-4">
-                    <input
+                    <Input
                       type="checkbox"
                       checked={habit.tracking?.[0]?.completed || false}
                       onChange={(e) =>
@@ -271,14 +350,28 @@ export default function Dashboard() {
           </div>
 
           {/* Widget de conseils */}
-          <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-6 rounded-xl shadow-sm text-white">
-            <h2 className="text-xl font-semibold mb-4">Conseil du jour</h2>
-            <p className="text-blue-100">
-              "Commencez petit : visez la constance plutôt que la perfection.
-              Une habitude de 5 minutes pratiquée régulièrement est plus
-              efficace qu'une habitude d'une heure pratiquée sporadiquement."
-            </p>
-          </div>
+          {showTip && (
+            <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-sm text-white relative max-w-2xl h-fit">
+              <div className="absolute top-2 right-2">
+                <button
+                  onClick={() => setShowTip(false)}
+                  className="p-1 hover:bg-blue-600 rounded-full transition-colors"
+                  aria-label="Fermer le conseil"
+                >
+                  <XMarkIcon className="h-5 w-5 text-blue-100 hover:text-white" />
+                </button>
+              </div>
+
+              <div className="p-6">
+                <h2 className="text-xl font-semibold mb-4">Conseil du jour</h2>
+                <p className="text-blue-100">
+                  Commencez petit : visez la constance plutôt que la perfection.
+                  Une habitude de 5 minutes pratiquée régulièrement est plus
+                  efficace qu'une habitude d'une heure pratiquée sporadiquement.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

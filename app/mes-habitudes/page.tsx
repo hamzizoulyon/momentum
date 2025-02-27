@@ -9,6 +9,7 @@ import {
   PlusIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
+import { Input } from "@/components/ui/input";
 
 interface Category {
   id: string;
@@ -107,7 +108,7 @@ export default function MesHabitudesPage() {
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
             </div>
-            <input
+            <Input
               type="text"
               placeholder="Rechercher une habitude..."
               value={searchTerm}
