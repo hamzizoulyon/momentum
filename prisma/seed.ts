@@ -1,17 +1,17 @@
 import { PrismaClient, BadgeCategory } from "@prisma/client";
-import * as bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  // Créer un utilisateur test
-  const hashedPassword = await bcrypt.hash("password123", 10);
-
-  const user = await prisma.user.create({
-    data: {
+  // Créer un utilisateur de test
+  const user = await prisma.user.upsert({
+    where: { email: "test@example.com" },
+    update: {},
+    create: {
       email: "test@example.com",
-      password: hashedPassword,
-      points: 150, // Points initiaux
+      password: await bcrypt.hash("password123", 12),
+      points: 150,
     },
   });
 
@@ -56,28 +56,53 @@ async function main() {
 
   for (const badge of badges) {
     await prisma.badge.create({
-      data: badge,
-    });
-  }
-
-  // Attribuer le badge "Débutant" à l'utilisateur test
-  const beginnerBadge = await prisma.badge.findFirst({
-    where: { name: "Débutant" },
-  });
-
-  if (beginnerBadge) {
-    await prisma.userBadge.create({
       data: {
-        userId: user.id,
-        badgeId: beginnerBadge.id,
+        name: badge.name,
+        description: badge.description,
+        pointsNeeded: badge.pointsNeeded,
+        category: badge.category,
+        imageUrl: badge.imageUrl,
       },
     });
   }
 
-  console.log("Base de données initialisée avec :");
-  console.log("- Utilisateur test créé");
-  console.log("- Badges créés");
-  console.log("Points initiaux:", user.points);
+  // Attribuer le badge "Débutant" à l'utilisateur test
+  const beginnerBadge = await prisma.badge.findFirst({ where: { name: "Débutant" } });
+  if (beginnerBadge) {
+    await prisma.userBadge.upsert({
+      where: { userId_badgeId: { userId: user.id, badgeId: beginnerBadge.id } },
+      update: {},
+      create: { userId: user.id, badgeId: beginnerBadge.id },
+    });
+  }
+
+  // Ajouter des habitudes avec historique
+  const habits = [
+    { name: "Méditation", description: "Pratiquez 10 minutes de méditation", userId: user.id },
+    { name: "Lecture", description: "Lire 20 pages d'un livre", userId: user.id },
+  ];
+
+  for (const habit of habits) {
+    const createdHabit = await prisma.habit.create({
+      data: {
+        userId: user.id,
+        name: habit.name,
+        description: habit.description,
+      },
+    });
+
+    for (let i = 1; i <= 7; i++) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      await prisma.habitTracking.create({
+        data: {
+          habitId: createdHabit.id,
+          completed: Math.random() < 0.7,
+          date,
+        },
+      });
+    }
+  }
 }
 
 main()

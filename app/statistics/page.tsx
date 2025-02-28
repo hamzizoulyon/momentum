@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   BarChart,
   Bar,
@@ -30,11 +30,7 @@ export default function StatisticsPage() {
   const [selectedPeriod, setSelectedPeriod] = useState("week");
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchHabitsData();
-  }, [selectedPeriod]);
-
-  const fetchHabitsData = async () => {
+  const fetchHabitsData = useCallback(async () => {
     try {
       const response = await fetch(
         "/api/habits/statistics?" +
@@ -49,7 +45,11 @@ export default function StatisticsPage() {
       console.error("Erreur lors de la récupération des statistiques:", error);
       setLoading(false);
     }
-  };
+  }, [selectedPeriod]);
+
+  useEffect(() => {
+    fetchHabitsData();
+  }, [fetchHabitsData]);
 
   // Préparer les données pour les graphiques
   const prepareWeeklyData = () => {

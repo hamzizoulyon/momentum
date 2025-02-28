@@ -1,19 +1,18 @@
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import { verify } from "jsonwebtoken";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../[...nextauth]/route";
 
-export function middleware(req: NextRequest) {
-  const token = req.cookies.get("auth_token")?.value;
-
-  if (!token) {
-    return NextResponse.redirect(new URL("/", req.url));
-  }
-
+export async function GET() {
   try {
-    verify(token, process.env.JWT_SECRET!);
-    return NextResponse.next();
-  } catch (error) {
-    return NextResponse.redirect(new URL("/", req.url));
+    const session = await getServerSession(authOptions);
+
+    if (!session) {
+      return NextResponse.json({ message: "Non autorisé" }, { status: 401 });
+    }
+
+    return NextResponse.json({ message: "Route protégée", session });
+  } catch {
+    return NextResponse.json({ message: "Erreur serveur" }, { status: 500 });
   }
 }
 

@@ -5,9 +5,9 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 First, run the development server:
 
 ```bash
-npm run dev
+npx prisma db push --force-reset
 # or
-yarn dev
+npx prisma db seed
 # or
 pnpm dev
 # or

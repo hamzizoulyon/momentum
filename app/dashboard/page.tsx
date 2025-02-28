@@ -28,51 +28,8 @@ import { PrismaClient } from "@prisma/client";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import prisma from "@/lib/prisma";
-
-const BADGES = [
-  {
-    name: "Débutant",
-    description: "Commencez votre voyage",
-    pointsNeeded: 0,
-    category: "BEGINNER",
-  },
-  {
-    name: "Apprenti",
-    description: "Complétez 10 habitudes",
-    pointsNeeded: 100,
-    category: "BEGINNER",
-  },
-  {
-    name: "Habitué",
-    description: "Atteignez 500 points",
-    pointsNeeded: 500,
-    category: "INTERMEDIATE",
-  },
-  {
-    name: "Expert",
-    description: "Maintenez 5 habitudes pendant 30 jours",
-    pointsNeeded: 1000,
-    category: "EXPERT",
-  },
-  {
-    name: "Maître",
-    description: "Atteignez 5000 points",
-    pointsNeeded: 5000,
-    category: "MASTER",
-  },
-  {
-    name: "Streak 7 jours",
-    description: "Maintenir une habitude pendant 7 jours",
-    pointsNeeded: 0,
-    category: "SPECIAL",
-  },
-  {
-    name: "Streak 30 jours",
-    description: "Maintenir une habitude pendant 30 jours",
-    pointsNeeded: 0,
-    category: "SPECIAL",
-  },
-];
+import { log } from "console";
+import useSWR from "swr";
 
 // Fonction pour obtenir le niveau en fonction des points
 function getLevelInfo(points: number) {
@@ -96,110 +53,6 @@ function getLevelInfo(points: number) {
   };
 }
 
-async function ObjectifsSection() {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user?.email) {
-    return null;
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
-    include: {
-      userBadges: {
-        include: {
-          badge: true,
-        },
-      },
-    },
-  });
-
-  if (!user) {
-    return null;
-  }
-
-  const levelInfo = getLevelInfo(user.points);
-
-  // Trouver les prochains badges disponibles
-  const nextBadges = await prisma.badge.findMany({
-    where: {
-      pointsNeeded: { gt: user.points },
-      NOT: {
-        id: { in: user.userBadges.map((ub) => ub.badgeId) },
-      },
-    },
-    orderBy: {
-      pointsNeeded: "asc",
-    },
-    take: 2,
-  });
-
-  return (
-    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
-      <div className="flex items-center mb-4">
-        <StarIcon className="h-6 w-6 text-amber-500 mr-2" />
-        <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Objectifs</h2>
-      </div>
-
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
-              <CheckBadgeIcon className="h-5 w-5 text-green-500" />
-            </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-700 dark:text-gray-200">Niveau actuel</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">{levelInfo.current?.name}</p>
-            </div>
-          </div>
-          <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-            Niveau {levelInfo.current?.level}
-          </span>
-        </div>
-
-        <div className="relative pt-1">
-          <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">
-            Progression niveau suivant
-          </div>
-          <div className="flex h-2 overflow-hidden rounded bg-gray-200 dark:bg-gray-700">
-            <div
-              className="flex flex-col justify-center overflow-hidden bg-blue-500"
-              role="progressbar"
-              style={{ width: `${levelInfo.progress}%` }}
-              aria-valuenow={levelInfo.progress}
-              aria-valuemin={0}
-              aria-valuemax={100}
-            ></div>
-          </div>
-          <div className="text-right text-xs text-gray-600 dark:text-gray-400 mt-1">
-            {user.points}/{levelInfo.next?.maxPoints} points
-          </div>
-        </div>
-
-        <div className="mt-4">
-          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Prochaines récompenses
-          </h3>
-          <div className="space-y-2">
-            {nextBadges.map((badge) => (
-              <div key={badge.id} className="flex items-center text-sm">
-                {badge.category === "SPECIAL" ? (
-                  <GiftIcon className="h-4 w-4 text-purple-500 mr-2" />
-                ) : (
-                  <TrophyIcon className="h-4 w-4 text-yellow-500 mr-2" />
-                )}
-                <span className="text-gray-600 dark:text-gray-400">
-                  Badge "{badge.name}" à {badge.pointsNeeded} points
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 interface User {
   id: string;
   email: string;
@@ -213,6 +66,19 @@ interface Badge {
   pointsNeeded: number;
 }
 
+interface Tracking {
+  id: string;
+  completed: boolean;
+  date: Date;
+}
+
+interface Habit {
+  id: string;
+  tracking: Tracking[];
+}
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
 export default function Dashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -224,10 +90,20 @@ export default function Dashboard() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [showTip, setShowTip] = useState(true);
   const [user, setUser] = useState<User | null>(null);
+  const [nextBadges, setNextBadges] = useState<Badge[]>([]);
   const levelInfo = user
     ? getLevelInfo(user.points || 0)
     : { current: null, next: null, progress: 0 };
-  const [nextBadges, setNextBadges] = useState<Badge[]>([]);
+  const [stats, setStats] = useState({
+    currentStreak: 0,
+    monthlyCompletion: 0,
+    trend: 0,
+  });
+
+  // Récupération des données utilisateur avec SWR
+  const { data: userData, mutate: mutateUser } = useSWR("/api/user", fetcher);
+  const { data: levelInfoData, mutate: mutateLevel } = useSWR("/api/levels", fetcher);
+  const { data: nextBadgesData, mutate: mutateBadges } = useSWR("/api/badges/next", fetcher);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -255,6 +131,20 @@ export default function Dashboard() {
     fetchHabits();
   }, []);
 
+  const calculateStats = async () => {
+    try {
+      const response = await fetch("/api/stats");
+      const data = await response.json();
+      setStats(data);
+    } catch (error) {
+      console.error("Erreur lors du calcul des statistiques:", error);
+    }
+  };
+
+  useEffect(() => {
+    calculateStats();
+  }, [habits]);
+
   // Calculer le pourcentage de réussite
   const calculateProgress = (habits: any[]) => {
     if (!habits || habits.length === 0) return 0;
@@ -264,35 +154,28 @@ export default function Dashboard() {
     return (completedToday / habits.length) * 100;
   };
 
-  const handleTrackingUpdate = async (habit: any, completed: boolean) => {
+  const handleTrackingUpdate = async (habit: Habit, completed: boolean) => {
     try {
-      const existingTracking = habit.tracking?.[0];
+      const today = new Date().toISOString().split("T")[0];
+      const existingTracking = habit.tracking?.find((t: any) => {
+        const trackingDate = new Date(t.date).toISOString().split("T")[0];
+        return trackingDate === today;
+      });
 
-      if (existingTracking) {
-        // Si un tracking existe déjà, on le met à jour
-        await fetch(`/api/habits/tracking/${existingTracking.id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            completed,
-          }),
-        });
-      } else {
-        // Sinon, on en crée un nouveau
-        await fetch("/api/habits/tracking", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            habitId: habit.id,
-            completed,
-            date: new Date(),
-          }),
-        });
+      if (!existingTracking || !existingTracking.id) {
+        console.log("No existing tracking found");
+        return;
       }
+
+      await fetch(`/api/habits/tracking/${existingTracking.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          completed,
+        }),
+      });
 
       fetchHabits(); // Rafraîchir les habitudes
     } catch (error) {
@@ -351,6 +234,11 @@ export default function Dashboard() {
     }
   }
 
+  // Fonction pour rafraîchir toutes les données
+  const refreshUserData = async () => {
+    await Promise.all([mutateUser(), mutateLevel(), mutateBadges()]);
+  };
+
   if (status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -400,21 +288,28 @@ export default function Dashboard() {
                   <FireIcon className="h-5 w-5 text-orange-500 mr-2" />
                   <span className="text-gray-600 dark:text-gray-400">Série actuelle</span>
                 </div>
-                <span className="font-semibold text-gray-800 dark:text-white">3 jours</span>
+                <span className="font-semibold text-gray-800 dark:text-white">
+                  {stats.currentStreak} jours
+                </span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <CalendarIcon className="h-5 w-5 text-purple-500 mr-2" />
                   <span className="text-gray-600 dark:text-gray-400">Ce mois</span>
                 </div>
-                <span className="font-semibold text-gray-800 dark:text-white">75%</span>
+                <span className="font-semibold text-gray-800 dark:text-white">
+                  {stats.monthlyCompletion}%
+                </span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <ArrowTrendingUpIcon className="h-5 w-5 text-green-500 mr-2" />
                   <span className="text-gray-600 dark:text-gray-400">Tendance</span>
                 </div>
-                <span className="text-green-500">+12%</span>
+                <span className={stats.trend >= 0 ? "text-green-500" : "text-red-500"}>
+                  {stats.trend > 0 ? "+" : ""}
+                  {stats.trend}%
+                </span>
               </div>
             </div>
           </div>
@@ -436,12 +331,12 @@ export default function Dashboard() {
                       Niveau actuel
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      {levelInfo.current?.name}
+                      {levelInfoData?.current?.name || "Chargement..."}
                     </p>
                   </div>
                 </div>
                 <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                  Niveau {levelInfo.current?.level}
+                  Niveau {levelInfoData?.current?.level || "0"}
                 </span>
               </div>
 
@@ -453,14 +348,14 @@ export default function Dashboard() {
                   <div
                     className="flex flex-col justify-center overflow-hidden bg-blue-500"
                     role="progressbar"
-                    style={{ width: `${levelInfo.progress}%` }}
-                    aria-valuenow={levelInfo.progress}
+                    style={{ width: `${levelInfoData?.progress || 0}%` }}
+                    aria-valuenow={levelInfoData?.progress || 0}
                     aria-valuemin={0}
                     aria-valuemax={100}
                   ></div>
                 </div>
                 <div className="text-right text-xs text-gray-600 dark:text-gray-400 mt-1">
-                  {user?.points}/{levelInfo.next?.maxPoints} points
+                  {userData?.points || 0}/{levelInfoData?.next?.maxPoints || 0} points
                 </div>
               </div>
 
@@ -469,7 +364,7 @@ export default function Dashboard() {
                   Prochaines récompenses
                 </h3>
                 <div className="space-y-2">
-                  {nextBadges.map((badge) => (
+                  {(nextBadgesData || []).map((badge) => (
                     <div key={badge.id} className="flex items-center text-sm">
                       {badge.category === "SPECIAL" ? (
                         <GiftIcon className="h-4 w-4 text-purple-500 mr-2" />
@@ -508,7 +403,7 @@ export default function Dashboard() {
               </button>
             </div>
             <div className="space-y-4">
-              {habits.map((habit: any) => (
+              {habits.map((habit: Habit) => (
                 <div
                   key={habit.id}
                   className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg"

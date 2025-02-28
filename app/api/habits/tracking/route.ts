@@ -45,7 +45,7 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json(tracking);
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Erreur lors du suivi de l'habitude" }, { status: 500 });
   }
 }
@@ -93,7 +93,7 @@ export async function GET(req: Request) {
     };
 
     return NextResponse.json({ tracking, stats });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Erreur lors de la récupération des statistiques" },
       { status: 500 }

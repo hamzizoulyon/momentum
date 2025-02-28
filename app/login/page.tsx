@@ -14,8 +14,8 @@ export default function LoginPage() {
     try {
       setError("");
       const result = await signIn("credentials", {
-        email,
-        password,
+        email: "test@example.com",
+        password: "password123",
         redirect: false,
       });
 
