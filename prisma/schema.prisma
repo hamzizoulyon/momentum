@@ -14,25 +14,29 @@ datasource db {
 }
 
 model User {
-  id        String     @id @default(cuid())
-  email     String     @unique
-  password  String
-  habits    Habit[]
-  categories Category[]
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @default(now())
+  id            String      @id @default(cuid())
+  email         String      @unique
+  password      String
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  points        Int         @default(0)
+  level         Int         @default(1)
+  userBadges    UserBadge[]
+  habits        Habit[]
+  categories    Category[]
 }
 
 model Category {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   name        String
   color       String   @default("#89AC46") // Couleur par défaut
   description String?
+  icon        String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   userId      String
-  user        User     @relation(fields: [userId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
   habits      Habit[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now())
 }
 
 model Habit {
@@ -59,4 +63,34 @@ model HabitTracking {
   
   @@unique([habitId, date])
   @@index([date])
+}
+
+model Badge {
+  id            String      @id @default(cuid())
+  name          String
+  description   String
+  imageUrl      String?
+  pointsNeeded  Int
+  category      BadgeCategory
+  createdAt     DateTime    @default(now())
+  userBadges    UserBadge[]
+}
+
+model UserBadge {
+  id        String   @id @default(cuid())
+  userId    String
+  badgeId   String
+  earnedAt  DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  badge     Badge    @relation(fields: [badgeId], references: [id])
+
+  @@unique([userId, badgeId])
+}
+
+enum BadgeCategory {
+  BEGINNER
+  INTERMEDIATE
+  EXPERT
+  MASTER
+  SPECIAL
 }

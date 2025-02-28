@@ -24,6 +24,194 @@ import {
 import Sidebar from "@/components/Sidebar";
 import EditHabitModal from "@/components/EditHabitModal";
 import { Input } from "@/components/ui/input";
+import { PrismaClient } from "@prisma/client";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import prisma from "@/lib/prisma";
+
+const BADGES = [
+  {
+    name: "Débutant",
+    description: "Commencez votre voyage",
+    pointsNeeded: 0,
+    category: "BEGINNER",
+  },
+  {
+    name: "Apprenti",
+    description: "Complétez 10 habitudes",
+    pointsNeeded: 100,
+    category: "BEGINNER",
+  },
+  {
+    name: "Habitué",
+    description: "Atteignez 500 points",
+    pointsNeeded: 500,
+    category: "INTERMEDIATE",
+  },
+  {
+    name: "Expert",
+    description: "Maintenez 5 habitudes pendant 30 jours",
+    pointsNeeded: 1000,
+    category: "EXPERT",
+  },
+  {
+    name: "Maître",
+    description: "Atteignez 5000 points",
+    pointsNeeded: 5000,
+    category: "MASTER",
+  },
+  {
+    name: "Streak 7 jours",
+    description: "Maintenir une habitude pendant 7 jours",
+    pointsNeeded: 0,
+    category: "SPECIAL",
+  },
+  {
+    name: "Streak 30 jours",
+    description: "Maintenir une habitude pendant 30 jours",
+    pointsNeeded: 0,
+    category: "SPECIAL",
+  },
+];
+
+// Fonction pour obtenir le niveau en fonction des points
+function getLevelInfo(points: number) {
+  const levels = [
+    { level: 1, name: "Débutant", minPoints: 0, maxPoints: 100 },
+    { level: 2, name: "Débutant motivé", minPoints: 100, maxPoints: 300 },
+    { level: 3, name: "Habitué", minPoints: 300, maxPoints: 600 },
+    { level: 4, name: "Expert", minPoints: 600, maxPoints: 1000 },
+    { level: 5, name: "Maître", minPoints: 1000, maxPoints: 2000 },
+  ];
+
+  const currentLevel = levels.findLast((level) => points >= level.minPoints);
+  const nextLevel = levels.find((level) => points < level.maxPoints);
+
+  return {
+    current: currentLevel,
+    next: nextLevel,
+    progress: nextLevel
+      ? ((points - nextLevel.minPoints) / (nextLevel.maxPoints - nextLevel.minPoints)) * 100
+      : 100,
+  };
+}
+
+async function ObjectifsSection() {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user?.email) {
+    return null;
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email },
+    include: {
+      userBadges: {
+        include: {
+          badge: true,
+        },
+      },
+    },
+  });
+
+  if (!user) {
+    return null;
+  }
+
+  const levelInfo = getLevelInfo(user.points);
+
+  // Trouver les prochains badges disponibles
+  const nextBadges = await prisma.badge.findMany({
+    where: {
+      pointsNeeded: { gt: user.points },
+      NOT: {
+        id: { in: user.userBadges.map((ub) => ub.badgeId) },
+      },
+    },
+    orderBy: {
+      pointsNeeded: "asc",
+    },
+    take: 2,
+  });
+
+  return (
+    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+      <div className="flex items-center mb-4">
+        <StarIcon className="h-6 w-6 text-amber-500 mr-2" />
+        <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Objectifs</h2>
+      </div>
+
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
+              <CheckBadgeIcon className="h-5 w-5 text-green-500" />
+            </div>
+            <div className="ml-3">
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-200">Niveau actuel</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{levelInfo.current?.name}</p>
+            </div>
+          </div>
+          <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+            Niveau {levelInfo.current?.level}
+          </span>
+        </div>
+
+        <div className="relative pt-1">
+          <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">
+            Progression niveau suivant
+          </div>
+          <div className="flex h-2 overflow-hidden rounded bg-gray-200 dark:bg-gray-700">
+            <div
+              className="flex flex-col justify-center overflow-hidden bg-blue-500"
+              role="progressbar"
+              style={{ width: `${levelInfo.progress}%` }}
+              aria-valuenow={levelInfo.progress}
+              aria-valuemin={0}
+              aria-valuemax={100}
+            ></div>
+          </div>
+          <div className="text-right text-xs text-gray-600 dark:text-gray-400 mt-1">
+            {user.points}/{levelInfo.next?.maxPoints} points
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Prochaines récompenses
+          </h3>
+          <div className="space-y-2">
+            {nextBadges.map((badge) => (
+              <div key={badge.id} className="flex items-center text-sm">
+                {badge.category === "SPECIAL" ? (
+                  <GiftIcon className="h-4 w-4 text-purple-500 mr-2" />
+                ) : (
+                  <TrophyIcon className="h-4 w-4 text-yellow-500 mr-2" />
+                )}
+                <span className="text-gray-600 dark:text-gray-400">
+                  Badge "{badge.name}" à {badge.pointsNeeded} points
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface User {
+  id: string;
+  email: string;
+  points: number;
+}
+
+interface Badge {
+  id: string;
+  name: string;
+  category: string;
+  pointsNeeded: number;
+}
 
 export default function Dashboard() {
   const { data: session, status } = useSession();
@@ -35,6 +223,11 @@ export default function Dashboard() {
   const [editingHabit, setEditingHabit] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [showTip, setShowTip] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
+  const levelInfo = user
+    ? getLevelInfo(user.points || 0)
+    : { current: null, next: null, progress: 0 };
+  const [nextBadges, setNextBadges] = useState<Badge[]>([]);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -120,6 +313,44 @@ export default function Dashboard() {
     }
   };
 
+  async function awardPointsForHabit(userId: string, habitId: string) {
+    const habit = await prisma.habit.findUnique({ where: { id: habitId } });
+    const points = habit.pointsValue;
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: { points: { increment: points } },
+    });
+
+    // Vérifier et attribuer les nouveaux badges
+    await checkAndAwardBadges(userId);
+  }
+
+  async function checkAndAwardBadges(userId: string) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { userBadges: true },
+    });
+
+    const eligibleBadges = await prisma.badge.findMany({
+      where: {
+        pointsNeeded: { lte: user.points },
+        NOT: {
+          id: { in: user.userBadges.map((ub) => ub.badgeId) },
+        },
+      },
+    });
+
+    for (const badge of eligibleBadges) {
+      await prisma.userBadge.create({
+        data: {
+          userId: user.id,
+          badgeId: badge.id,
+        },
+      });
+    }
+  }
+
   if (status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -204,11 +435,13 @@ export default function Dashboard() {
                     <p className="text-sm font-medium text-gray-700 dark:text-gray-200">
                       Niveau actuel
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Débutant motivé</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {levelInfo.current?.name}
+                    </p>
                   </div>
                 </div>
                 <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                  Niveau 2
+                  Niveau {levelInfo.current?.level}
                 </span>
               </div>
 
@@ -220,14 +453,14 @@ export default function Dashboard() {
                   <div
                     className="flex flex-col justify-center overflow-hidden bg-blue-500"
                     role="progressbar"
-                    style={{ width: "65%" }}
-                    aria-valuenow={65}
+                    style={{ width: `${levelInfo.progress}%` }}
+                    aria-valuenow={levelInfo.progress}
                     aria-valuemin={0}
                     aria-valuemax={100}
                   ></div>
                 </div>
                 <div className="text-right text-xs text-gray-600 dark:text-gray-400 mt-1">
-                  65/100 points
+                  {user?.points}/{levelInfo.next?.maxPoints} points
                 </div>
               </div>
 
@@ -236,18 +469,18 @@ export default function Dashboard() {
                   Prochaines récompenses
                 </h3>
                 <div className="space-y-2">
-                  <div className="flex items-center text-sm">
-                    <GiftIcon className="h-4 w-4 text-purple-500 mr-2" />
-                    <span className="text-gray-600 dark:text-gray-400">
-                      Nouveau thème à 75 points
-                    </span>
-                  </div>
-                  <div className="flex items-center text-sm">
-                    <TrophyIcon className="h-4 w-4 text-yellow-500 mr-2" />
-                    <span className="text-gray-600 dark:text-gray-400">
-                      Badge "Expert" à 100 points
-                    </span>
-                  </div>
+                  {nextBadges.map((badge) => (
+                    <div key={badge.id} className="flex items-center text-sm">
+                      {badge.category === "SPECIAL" ? (
+                        <GiftIcon className="h-4 w-4 text-purple-500 mr-2" />
+                      ) : (
+                        <TrophyIcon className="h-4 w-4 text-yellow-500 mr-2" />
+                      )}
+                      <span className="text-gray-600 dark:text-gray-400">
+                        Badge "{badge.name}" à {badge.pointsNeeded} points
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>

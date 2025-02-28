@@ -2,8 +2,20 @@ import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import prisma from "@/lib/prisma";
+import type { NextAuthOptions } from "next-auth";
 
-export const authOptions = {
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id: string;
+      email: string;
+      name?: string | null;
+      image?: string | null;
+    }
+  }
+}
+
+export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -40,9 +52,8 @@ export const authOptions = {
       return token;
     },
     async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.id;
-        session.user.email = token.email;
+      if (session?.user) {
+        session.user.id = token.sub as string;
       }
       return session;
     },

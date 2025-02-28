@@ -1,70 +1,83 @@
-import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcryptjs";
+import { PrismaClient, BadgeCategory } from "@prisma/client";
+import * as bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  // Créer un utilisateur de test
+  // Créer un utilisateur test
   const hashedPassword = await bcrypt.hash("password123", 10);
-  const user = await prisma.user.upsert({
-    where: { email: "test@example.com" },
-    update: {},
-    create: {
+
+  const user = await prisma.user.create({
+    data: {
       email: "test@example.com",
-      password: await bcrypt.hash("password123", 12),
+      password: hashedPassword,
+      points: 150, // Points initiaux
     },
   });
 
-  // Créer quelques habitudes
-  const habits = [
+  // Créer les badges
+  const badges = [
     {
-      name: "Méditation",
-      description: "10 minutes de méditation le matin",
-      frequency: "DAILY",
+      name: "Débutant",
+      description: "Commencez votre voyage",
+      pointsNeeded: 0,
+      category: BadgeCategory.BEGINNER,
+      imageUrl: "/badges/beginner.png",
     },
     {
-      name: "Lecture",
-      description: "Lire 30 minutes",
-      frequency: "DAILY",
+      name: "Apprenti",
+      description: "Complétez 10 habitudes",
+      pointsNeeded: 100,
+      category: BadgeCategory.BEGINNER,
+      imageUrl: "/badges/apprentice.png",
     },
     {
-      name: "Sport",
-      description: "Séance de sport",
-      frequency: "WEEKLY",
+      name: "Habitué",
+      description: "Atteignez 500 points",
+      pointsNeeded: 500,
+      category: BadgeCategory.INTERMEDIATE,
+      imageUrl: "/badges/regular.png",
+    },
+    {
+      name: "Expert",
+      description: "Maintenez 5 habitudes pendant 30 jours",
+      pointsNeeded: 1000,
+      category: BadgeCategory.EXPERT,
+      imageUrl: "/badges/expert.png",
+    },
+    {
+      name: "Maître",
+      description: "Atteignez 5000 points",
+      pointsNeeded: 5000,
+      category: BadgeCategory.MASTER,
+      imageUrl: "/badges/master.png",
     },
   ];
 
-  for (const habit of habits) {
-    const createdHabit = await prisma.habit.create({
-      data: {
-        ...habit,
-        userId: user.id,
-      },
+  for (const badge of badges) {
+    await prisma.badge.create({
+      data: badge,
     });
-
-    // Créer des trackings pour les 7 derniers jours
-    const dates = Array.from({ length: 7 }, (_, i) => {
-      const date = new Date();
-      date.setDate(date.getDate() - i);
-      return date;
-    });
-
-    for (const date of dates) {
-      await prisma.habitTracking.create({
-        data: {
-          habitId: createdHabit.id,
-          completed: Math.random() > 0.3, // 70% de chance d'être complété
-          date,
-          notes: Math.random() > 0.5 ? "Note de test" : undefined,
-        },
-      });
-    }
   }
 
-  console.log("Base de données initialisée avec succès");
-  console.log("Utilisateur de test créé:");
-  console.log("Email: test@example.com");
-  console.log("Mot de passe: password123");
+  // Attribuer le badge "Débutant" à l'utilisateur test
+  const beginnerBadge = await prisma.badge.findFirst({
+    where: { name: "Débutant" },
+  });
+
+  if (beginnerBadge) {
+    await prisma.userBadge.create({
+      data: {
+        userId: user.id,
+        badgeId: beginnerBadge.id,
+      },
+    });
+  }
+
+  console.log("Base de données initialisée avec :");
+  console.log("- Utilisateur test créé");
+  console.log("- Badges créés");
+  console.log("Points initiaux:", user.points);
 }
 
 main()
